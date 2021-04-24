@@ -121,6 +121,142 @@ SELECT
 FROM
     Fidelidade
 
-    
+
+-- GROUP BY --
+/* Qual é a quantidade de clientes por cidade? */
+SELECT 
+    COUNT(*) AS Qtd_Clientes,
+    Cidade
+FROM
+    Cliente
+GROUP BY
+    Cidade
+
+/* Qual é a quantidade de formas de pagamento por tipo? */
+SELECT 
+    COUNT(*) AS Qtd_Formas_Pag,
+    Tipo
+FROM
+    Forma_Pagamento
+GROUP BY
+    Tipo
+
+/* Qual é o valor de venda da Candies por cada mês do ano? */
+SELECT
+    SUM(Valor) AS Vendas_Mensais,
+    MONTH([Data]) AS Mes
+FROM
+    Pedido_Venda 
+GROUP BY
+    MONTH([Data])
+
+
+-- CASE WHEN --
+/* Trazer os nomes dos clientes classificando se é fora ou dentro do estado de SP. */
+SELECT
+    CASE
+        WHEN Estado = 'SP' THEN 'Dentro de São Paulo'
+        ELSE 'Fora de São Paulo'
+    END AS Localidade,
+    Nome,
+    Estado
+FROM
+    Cliente
+
+/* Trazer as formas de pagamento classidicando-as em cartão, refeição ou outro tipo de pagamento. */
+SELECT
+    Nome,
+    CASE
+        WHEN Tipo LIKE '%Cartão%' THEN 'Cartão'
+        WHEN Tipo LIKE '%Refeição%' THEN 'Refeição'
+        ELSE 'Outros'
+    END AS Tipo_Pagamento
+FROM
+    Forma_Pagamento
+
+
+-- INNER JOIN --
+/* Quais são os nomes dos clientes que possuem fidelidade e quantos pontos eles possuem? */
+SELECT
+    C.Nome,
+    F.Pontos
+FROM
+    Cliente AS C
+    INNER JOIN Fidelidade AS F ON C.Codigo = F.Codigo_Cliente
+
+/* Qual a quantidade de venda de cada produto vendido com o nome? */
+SELECT
+    P.Nome,
+    SUM(IPV.Quantidade) AS Quantidade
+FROM
+    Item_Pedido_Venda AS IPV
+    INNER JOIN Produto AS P ON P.Codigo = IPV.Codigo_Produto
+GROUP BY
+    P.Nome
+
+/* Qual a quantidade de venda de cada produto vendido com o nome e marca? */
+SELECT
+    P.Nome AS [Nome Produto],
+    M.Nome AS [Nome Marca],
+    SUM(I.Quantidade) AS Quantidade
+FROM
+    Item_Pedido_Venda AS I
+    INNER JOIN Produto AS P ON P.Codigo = I.Codigo_Produto
+    INNER JOIN Marca AS M On M.Codigo = P.Codigo_Marca
+GROUP BY
+    P.Nome, M.Nome
+ORDER BY
+    SUM(I.Quantidade) DESC
+
+
+-- LEFT JOIN --
+/* Quais são os nomes de todos os clientes e quantos pontos eles possuem? */
+SELECT 
+    C.Nome,
+    CASE
+        WHEN F.Pontos IS NULL THEN 0
+        ELSE F.Pontos
+    END AS Pontos_Cliente
+FROM
+    Cliente AS C
+    LEFT JOIN Fidelidade AS F ON C.Codigo = F.Codigo_Cliente
+ORDER BY
+    F.Pontos DESC
+
+/* Quais são os nomes dos distribuidores e tragam o valor de compra que a Candies realizou, inclusive os que não possuem compras? */
+SELECT
+   D.Nome_Fantasia,
+    CASE
+        WHEN SUM(PC.Valor) IS NULL THEN 0
+        ELSE SUM(PC.Valor)
+    END AS Valor_Comprado
+FROM
+    Distribuidor AS D
+    LEFT JOIN Pedido_Compra AS PC ON D.Codigo = PC.Codigo_Distribuidor
+GROUP BY
+    D.Nome_Fantasia
+ 
+
+-- LEFT OUTER JOIN --
+/* Quais são os nomes dos clientes que nao tem fidelidade? */
+SELECT
+    C.Nome,
+    C.Telefone
+FROM
+    Cliente AS C
+    LEFT JOIN Fidelidade AS F ON C.Codigo = F.Codigo_Cliente
+WHERE
+    F.Pontos IS NULL
+
+/* Quais produtos que nunca foram vendidos? */
+SELECT
+    P.Nome
+FROM
+    Produto AS P
+    LEFT JOIN Item_Pedido_Venda AS I ON P.Codigo = I.Codigo_Produto
+WHERE 
+    I.Quantidade IS NULL
+
+
 --COMMIT
 --ROLLBACK
