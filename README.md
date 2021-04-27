@@ -13,6 +13,7 @@
 - **Aplicativos Utilizados**
   - https://app.diagrams.net/
     - Para criação do MER e do DER
+    - Usado para abrir os arquivos .drawio
   - Azure Data Studio
     - Para criação e manipulação do banco de dados 
   - Docker
